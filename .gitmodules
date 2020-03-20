@@ -3,7 +3,7 @@
 	url = https://github.com/GhostPack/Rubeus
 [submodule "Covenant/Data/ReferenceSourceLibraries/SharpSploit"]
 	path = Covenant/Data/ReferenceSourceLibraries/SharpSploit
-	url = https://github.com/cobbr/SharpSploit
+	url = https://github.com/fasetto/SharpSploit
 [submodule "Covenant/Data/ReferenceSourceLibraries/SharpDPAPI"]
 	path = Covenant/Data/ReferenceSourceLibraries/SharpDPAPI
 	url = https://github.com/GhostPack/SharpDPAPI
