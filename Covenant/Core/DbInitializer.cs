@@ -2357,7 +2357,27 @@ namespace Covenant.Core
                                 DisplayInCommand = true
                             }
                         }
-                    }
+                    },
+                    new GruntTask
+                    {
+                        Name = "CreateDirectory",
+                        AlternateNames = new List<string>{ "mkdir" },
+                        Description = "Creates all directories and subdirectories in the specified path unless they already exist.",
+                        Code = File.ReadAllText(Path.Combine(Common.CovenantTaskCSharpDirectory, "CreateDirectory" + ".task")),
+                        Options = new List<GruntTaskOption>
+                        {
+                            new GruntTaskOption
+                            {
+                                Id = 115,
+                                Name = "Path",
+                                Description = "The directory to create.",
+                                SuggestedValues = new List<string>(),
+                                Optional = false,
+                                DefaultValue = "",
+                                DisplayInCommand = true
+                            }
+                        }
+                    },
                 };
                 await context.GruntTasks.AddRangeAsync(GruntTasks);
                 await context.SaveChangesAsync();
@@ -2455,14 +2475,15 @@ namespace Covenant.Core
                     new GruntTaskEmbeddedResource { EmbeddedResource = er2, GruntTask = await context.GetGruntTaskByName("DCSync") },
                     new GruntTaskEmbeddedResource { EmbeddedResource = er2, GruntTask = await context.GetGruntTaskByName("SafetyKatz") }
                 );
-                var upload = await context.GetGruntTaskByName("Upload");
-                var download = await context.GetGruntTaskByName("Download");
-                var privexchange = await context.GetGruntTaskByName("PrivExchange");
-                var screenshot = await context.GetGruntTaskByName("ScreenShot");
-                var readtextfile = await context.GetGruntTaskByName("ReadTextFile");
-                var delete = await context.GetGruntTaskByName("Delete");
-                var kill = await context.GetGruntTaskByName("Kill");
+                var upload        = await context.GetGruntTaskByName("Upload");
+                var download      = await context.GetGruntTaskByName("Download");
+                var privexchange  = await context.GetGruntTaskByName("PrivExchange");
+                var screenshot    = await context.GetGruntTaskByName("ScreenShot");
+                var readtextfile  = await context.GetGruntTaskByName("ReadTextFile");
+                var delete        = await context.GetGruntTaskByName("Delete");
+                var kill          = await context.GetGruntTaskByName("Kill");
                 var getcurrentdir = await context.GetGruntTaskByName("GetCurrentDirectory");
+                var makedir       = await context.GetGruntTaskByName("CreateDirectory");
 
                 await context.AddRangeAsync(
     new GruntTaskReferenceAssembly { GruntTask = upload, ReferenceAssembly = await context.GetReferenceAssemblyByName("mscorlib.dll", Common.DotNetVersion.Net35) },
@@ -2501,6 +2522,14 @@ namespace Covenant.Core
     new GruntTaskReferenceAssembly { GruntTask = getcurrentdir, ReferenceAssembly = await context.GetReferenceAssemblyByName("System.dll", Common.DotNetVersion.Net40) },
     new GruntTaskReferenceAssembly { GruntTask = getcurrentdir, ReferenceAssembly = await context.GetReferenceAssemblyByName("System.Core.dll", Common.DotNetVersion.Net35) },
     new GruntTaskReferenceAssembly { GruntTask = getcurrentdir, ReferenceAssembly = await context.GetReferenceAssemblyByName("System.Core.dll", Common.DotNetVersion.Net40) },
+    
+    new GruntTaskReferenceAssembly { GruntTask = makedir, ReferenceAssembly = await context.GetReferenceAssemblyByName("mscorlib.dll", Common.DotNetVersion.Net35) },
+    new GruntTaskReferenceAssembly { GruntTask = makedir, ReferenceAssembly = await context.GetReferenceAssemblyByName("mscorlib.dll", Common.DotNetVersion.Net40) },
+    new GruntTaskReferenceAssembly { GruntTask = makedir, ReferenceAssembly = await context.GetReferenceAssemblyByName("System.dll", Common.DotNetVersion.Net35) },
+    new GruntTaskReferenceAssembly { GruntTask = makedir, ReferenceAssembly = await context.GetReferenceAssemblyByName("System.dll", Common.DotNetVersion.Net40) },
+    new GruntTaskReferenceAssembly { GruntTask = makedir, ReferenceAssembly = await context.GetReferenceAssemblyByName("System.Core.dll", Common.DotNetVersion.Net35) },
+    new GruntTaskReferenceAssembly { GruntTask = makedir, ReferenceAssembly = await context.GetReferenceAssemblyByName("System.Core.dll", Common.DotNetVersion.Net40) },
+
     new GruntTaskReferenceAssembly { GruntTask = privexchange, ReferenceAssembly = await context.GetReferenceAssemblyByName("System.XML.dll", Common.DotNetVersion.Net35) },
     new GruntTaskReferenceAssembly { GruntTask = privexchange, ReferenceAssembly = await context.GetReferenceAssemblyByName("System.XML.dll", Common.DotNetVersion.Net40) },
 
