@@ -9,6 +9,8 @@ using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Identity;
 
 using Covenant.Models;
+using Covenant.Models.Covenant;
+using Covenant.Models.Settings;
 using Covenant.Models.Launchers;
 using Covenant.Models.Listeners;
 using Covenant.Models.Grunts;
@@ -26,6 +28,7 @@ namespace Covenant.Core
             await InitializeLaunchers(context);
             await InitializeTasks(context);
             await InitializeRoles(roleManager);
+            await InitializeThemes(context);
         }
 
         public async static Task InitializeImplantTemplates(CovenantContext context)
@@ -2556,6 +2559,93 @@ namespace Covenant.Core
                 {
                     IdentityResult roleResult = await roleManager.CreateAsync(new IdentityRole(role));
                 }
+            }
+        }
+
+        public async static Task InitializeThemes(CovenantContext context)
+        { 
+            if (!context.Themes.Any())
+            {
+                var themes = new List<Theme>
+                {
+                    new Theme { Id = 1, Name = "Covenant", Description = "Covenant Standard Theme" },
+                    new Theme { Id = 2, Name = "Dark Theme", Description = "Covenant Dark Theme" }
+                };
+
+                await context.Themes.AddRangeAsync(themes);
+                await context.SaveChangesAsync();
+            }
+
+            if (!context.Settings.Any(s => s.Key == Common.Settings.Themes.Standard))
+            {
+                var setting = new Setting() { Key = Common.Settings.Themes.Standard, Value = "1", Title = "Standard Theme", Description = "Standard Theme" };
+                context.Settings.Add(setting);
+                await context.SaveChangesAsync();
+            }
+
+            if (!context.Settings.Any(s => s.Key == Common.Settings.Themes.Dark))
+            {
+                var setting = new Setting() { Key = Common.Settings.Themes.Dark, Value = "2", Title = "Dark Theme", Description = "Dark Theme" };
+                context.Settings.Add(setting);
+                await context.SaveChangesAsync();
+            }
+
+            if (!context.ThemeOptions.Any())
+            {
+                // standard
+                var stamdardThemeOptions = new List<ThemeOption>
+                {
+                    new ThemeOption { ThemeId = 1, Name = Common.Settings.Themes.Options.BackgroundColor, Value = "#ffffff", Description = "Background Color" },
+                    new ThemeOption { ThemeId = 1, Name = Common.Settings.Themes.Options.SidebarColor, Value = "#f8f9fa", Description = "Sidebar" },
+                    new ThemeOption { ThemeId = 1, Name = Common.Settings.Themes.Options.TextColor, Value = "#212529", Description = "Fonts/Text Color" },
+                    new ThemeOption { ThemeId = 1, Name = Common.Settings.Themes.Options.TextHeaderColor, Value = "#212529", Description = "Header Color" },
+                    new ThemeOption { ThemeId = 1, Name = Common.Settings.Themes.Options.TextLinksColor, Value = "#007bff", Description = "Text Links" },
+                    new ThemeOption { ThemeId = 1, Name = Common.Settings.Themes.Options.NavLinksColor, Value = "#333333", Description = "Navigation Links Color" },
+                    new ThemeOption { ThemeId = 1, Name = Common.Settings.Themes.Options.NavLinksColorSelected, Value = "#ffffff", Description = "Navigation Links Color Selected" },
+                    new ThemeOption { ThemeId = 1, Name = Common.Settings.Themes.Options.NavLinksColorHover, Value = "#333333", Description = "Navigation Links Color Hover" },
+                    new ThemeOption { ThemeId = 1, Name = Common.Settings.Themes.Options.ButtonDefaultColor, Value = "#333333", Description = "Button Default Color" },
+                    new ThemeOption { ThemeId = 1, Name = Common.Settings.Themes.Options.ButtonPrimaryColor, Value = "#333333", Description = "Button Primary Color" },
+                    new ThemeOption { ThemeId = 1, Name = Common.Settings.Themes.Options.ButtonDangerColor, Value = "#333333", Description = "Button Danger Color" },
+                    new ThemeOption { ThemeId = 1, Name = Common.Settings.Themes.Options.NavLinksIconColor, Value = "#333333", Description = "Navigation Links Icon Color" },
+                    new ThemeOption { ThemeId = 1, Name = Common.Settings.Themes.Options.TextLinksHoverColor, Value = "#212529", Description = "Text Links Hover Color" },
+                    new ThemeOption { ThemeId = 1, Name = Common.Settings.Themes.Options.CustomCss, Value = "", Description = "Custom CSS" }
+                };
+                await context.ThemeOptions.AddRangeAsync(stamdardThemeOptions);
+                // dark
+                var darkThemeOptions = new List<ThemeOption>
+                {
+                    new ThemeOption { ThemeId = 2, Name = Common.Settings.Themes.Options.BackgroundColor, Value = "#222222", Description = "Background Color" },
+                    new ThemeOption { ThemeId = 2, Name = Common.Settings.Themes.Options.SidebarColor, Value = "#222222", Description = "Sidebar" },
+                    new ThemeOption { ThemeId = 2, Name = Common.Settings.Themes.Options.TextColor, Value = "#e6e6e6", Description = "Fonts/Text Color" },
+                    new ThemeOption { ThemeId = 2, Name = Common.Settings.Themes.Options.TextHeaderColor, Value = "#e6e6e6", Description = "Header Color" },
+                    new ThemeOption { ThemeId = 2, Name = Common.Settings.Themes.Options.TextLinksColor, Value = "#757475", Description = "Text Links" },
+                    new ThemeOption { ThemeId = 2, Name = Common.Settings.Themes.Options.NavLinksColor, Value = "#e6e6e6", Description = "Navigation Links Color" },
+                    new ThemeOption { ThemeId = 2, Name = Common.Settings.Themes.Options.NavLinksColorSelected, Value = "#333333", Description = "Navigation Links Color Selected" },
+                    new ThemeOption { ThemeId = 2, Name = Common.Settings.Themes.Options.NavLinksColorHover, Value = "#333333", Description = "Navigation Links Color Hover" },
+                    new ThemeOption { ThemeId = 2, Name = Common.Settings.Themes.Options.ButtonDefaultColor, Value = "#333333", Description = "Button Default Color" },
+                    new ThemeOption { ThemeId = 2, Name = Common.Settings.Themes.Options.ButtonPrimaryColor, Value = "#333333", Description = "Button Primary Color" },
+                    new ThemeOption { ThemeId = 2, Name = Common.Settings.Themes.Options.ButtonDangerColor, Value = "#333333", Description = "Button Danger Color" },
+                    new ThemeOption { ThemeId = 2, Name = Common.Settings.Themes.Options.NavLinksIconColor, Value = "#333333", Description = "Navigation Links Icon Color" },
+                    new ThemeOption { ThemeId = 2, Name = Common.Settings.Themes.Options.TextLinksHoverColor, Value = "#4b4b4b", Description = "Text Links Hover Color" },
+                    new ThemeOption { ThemeId = 2, Name = Common.Settings.Themes.Options.CustomCss, Value = "", Description = "Custom CSS" }
+                };
+                await context.ThemeOptions.AddRangeAsync(darkThemeOptions);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public async static Task InitializeSettings(CovenantContext context) {
+            if (!context.Settings.Any())
+            {
+                var themes = new List<Setting>
+                {
+                    // default theme settings
+                    new Setting { Title = "Theme", Key = Common.Settings.Themes.Standard,  Value = "1", DefaultValue = null, Description = "Standard Theme" },
+                    new Setting { Title = "Dark Theme", Key = Common.Settings.Themes.Dark, Value = "2", DefaultValue = null, Description = "Dark Theme" }
+                };
+
+                await context.Settings.AddRangeAsync(themes);
+                await context.SaveChangesAsync();
             }
         }
     }

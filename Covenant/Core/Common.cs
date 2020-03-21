@@ -24,7 +24,7 @@ namespace Covenant.Core
 
         public static string CovenantDirectory = Assembly.GetExecutingAssembly().Location.Split("bin")[0].Split("Covenant.dll")[0];
         public static string CovenantDataDirectory = CovenantDirectory + "Data" + Path.DirectorySeparatorChar;
-		public static string CovenantDatabaseFile = CovenantDataDirectory + "covenant.db";
+        public static string CovenantDatabaseFile = CovenantDataDirectory + "covenant.db";
         public static string CovenantTempDirectory = CovenantDataDirectory + "Temp" + Path.DirectorySeparatorChar;
 
         public static string CovenantProfileDirectory = CovenantDataDirectory + "Profiles" + Path.DirectorySeparatorChar;
@@ -93,6 +93,76 @@ namespace Covenant.Core
             Net40,
             Net35,
             NetCore21
+        }
+
+        public static class Settings {
+            // themes
+            public static class Themes
+            {
+                public static string Standard { get; } = "StandardTheme";
+                public static string Dark { get; } = "DarkTheme";
+
+                public static class Options
+                {
+                    /// <summary>
+                    /// Name: BackgroundColor
+                    /// </summary>
+                    public static string BackgroundColor { get; } = "BackgroundColor";
+                    /// <summary>
+                    /// Name: Sidebar
+                    /// </summary>
+                    public static string SidebarColor { get; } = "SidebarColor";
+                    /// <summary>
+                    /// Name: TextColor
+                    /// </summary>
+                    public static string TextColor { get; } = "TextColor";
+                    /// <summary>
+                    /// Name: TextHeader
+                    /// </summary>
+                    public static string TextHeaderColor { get; } = "TextHeaderColor";
+                    /// <summary>
+                    /// Name: TextLinks
+                    /// </summary>
+                    public static string TextLinksColor { get; } = "TextLinksColor";
+                    /// <summary>
+                    /// Name: TextLinksHoverColor
+                    /// </summary>
+                    public static string TextLinksHoverColor { get; } = "TextLinksHoverColor";
+                    /// <summary>
+                    /// Name: NavLinksColor
+                    /// </summary>
+                    public static string NavLinksColor { get; } = "NavLinksColor";
+                    /// <summary>
+                    /// Name: NavLinksIconColor
+                    /// </summary>
+                    public static string NavLinksIconColor { get; } = "NavLinksIconColor";
+                    /// <summary>
+                    /// Name: NavLinksColorSelected
+                    /// </summary>
+                    public static string NavLinksColorSelected { get; } = "NavLinksColorSelected";
+                    /// <summary>
+                    /// Name: NavLinksColorHover
+                    /// </summary>
+                    public static string NavLinksColorHover { get; } = "NavLinksColorHover";
+                    /// <summary>
+                    /// Name: ButtonDefaultColor
+                    /// </summary>
+                    public static string ButtonDefaultColor { get; } = "ButtonDefaultColor";
+                    /// <summary>
+                    /// Name: ButtonPrimaryColor
+                    /// </summary>
+                    public static string ButtonPrimaryColor { get; } = "ButtonPrimaryColor";
+                    /// <summary>
+                    /// Name: ButtonDangerColor
+                    /// </summary>
+                    public static string ButtonDangerColor { get; } = "ButtonDangerColor";
+                    /// <summary>
+                    /// Name: CustomCss
+                    /// </summary>
+                    public static string CustomCss { get; } = "CustomCss";
+
+                }
+            }            
         }
     }
 }
