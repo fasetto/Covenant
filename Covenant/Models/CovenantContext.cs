@@ -27,8 +27,6 @@ using Covenant.Models.Listeners;
 using Covenant.Models.Launchers;
 using Covenant.Models.Grunts;
 using Covenant.Models.Indicators;
-using Covenant.Models.Settings;
-using System.Text;
 
 namespace Covenant.Models
 {
@@ -52,13 +50,8 @@ namespace Covenant.Models
 
         public DbSet<Event> Events { get; set; }
 
-        public DbSet<Theme> Themes { get; set; }
-        public DbSet<ThemeOption> ThemeOptions { get; set; }
-
         public DbSet<CapturedCredential> Credentials { get; set; }
         public DbSet<Indicator> Indicators { get; set; }
-
-        public DbSet<Setting> Settings { get; set; }
 
         public CovenantContext(DbContextOptions<CovenantContext> options) : base(options)
         {
@@ -75,7 +68,7 @@ namespace Covenant.Models
             builder.Entity<HttpListener>().ToTable("HttpListener");
             builder.Entity<HttpProfile>().HasBaseType<Profile>().ToTable("HttpProfile");
             builder.Entity<BridgeListener>().ToTable("BridgeListener");
-            builder.Entity<BridgeProfile>().HasBaseType<Profile>().ToTable("BridgeProfile");           
+            builder.Entity<BridgeProfile>().HasBaseType<Profile>().ToTable("BridgeProfile");
 
             builder.Entity<WmicLauncher>().ToTable("WmicLauncher");
             builder.Entity<Regsvr32Launcher>().ToTable("Regsvr32Launcher");
@@ -94,17 +87,9 @@ namespace Covenant.Models
             builder.Entity<DownloadEvent>().ToTable("DownloadEvent");
             builder.Entity<ScreenshotEvent>().ToTable("ScreenshotEvent");
 
-            builder.Entity<Theme>().ToTable("Themes");
-            builder.Entity<Setting>().ToTable("Settings");
-
             builder.Entity<FileIndicator>().ToTable("FileIndicator");
             builder.Entity<NetworkIndicator>().ToTable("NetworkIndicator");
             builder.Entity<TargetIndicator>().ToTable("TargetIndicator");
-            
-            builder.Entity<ThemeOption>()
-                .HasKey(t => new { t.Name, t.ThemeId });
-            builder.Entity<ThemeOption>()
-                .HasOne(t => t.Theme);
 
             builder.Entity<Grunt>()
                 .HasOne(G => G.ImplantTemplate)
@@ -175,8 +160,6 @@ namespace Covenant.Models
             builder.Entity<GruntTaskReferenceSourceLibrary>()
                 .HasOne(gtrsl => gtrsl.ReferenceSourceLibrary)
                 .WithMany("GruntTaskReferenceSourceLibraries");
-
-
 
             builder.Entity<Listener>().Property(L => L.ConnectAddresses).HasConversion(
                 v => JsonConvert.SerializeObject(v),
@@ -2754,163 +2737,6 @@ public static class Task
         }
         #endregion
 
-        #region Theme Actions
-        public async Task<IEnumerable<Theme>> GetThemes()
-        {
-            return await this.Themes.OrderBy(s => s.Name).ToListAsync();
-        }
-
-        public async Task<Theme> GetTheme(int themeId)
-        {
-            Theme theme = await this.Themes.FindAsync(themeId);
-            if (theme == null)
-            {
-                throw new ControllerNotFoundException($"NotFound - Theme with id: {themeId}");
-            }
-            IEnumerable<ThemeOption> options = await this.ThemeOptions.Where(o => o.ThemeId == theme.Id).ToListAsync();
-            theme.Options = options;
-            return theme;
-        }
-
-        public async Task<Theme> GetThemeByType(ThemeType themeType)
-        {
-            if (themeType == ThemeType.Standard)
-            {
-                Setting setting = await this.Settings.SingleAsync(s => s.Key == Common.Settings.Themes.Standard);
-                Theme theme = await GetTheme(Convert.ToInt32(setting.Value));
-                return theme;
-            } else if (themeType == ThemeType.Dark)
-            {
-                Setting setting = await this.Settings.SingleAsync(s => s.Key == Common.Settings.Themes.Dark);
-                Theme theme = await GetTheme(Convert.ToInt32(setting.Value));
-                return theme;
-            }
-
-            throw new InvalidOperationException($"The \"{themeType.ToString()}\" theme could not be located.");
-        }
-
-        public async Task<string> GetThemeCss(ThemeType type)
-        {
-            Theme theme = await GetThemeByType(type);
-            string themeClass = "." + type.ToString().ToLower();
-            
-            var css = new StringBuilder();
-            var tempCss = string.Empty;            
-
-            Func<string, string, string> buildCssAttribute = (string attribute, string value) =>
-            {
-                if (String.IsNullOrWhiteSpace(value))
-                    return string.Empty;
-
-                string cssAttr = $"{attribute}: {value};";
-                return cssAttr;
-            };
-
-            // background
-            string backgroundColor = theme.Options?.GetValueByName(Common.Settings.Themes.Options.BackgroundColor);
-            string sidebarColor = theme.Options?.GetValueByName(Common.Settings.Themes.Options.SidebarColor);
-
-            // text elements
-            string textColor = theme.Options?.GetValueByName(Common.Settings.Themes.Options.TextColor);
-            string textHeaderColor = theme.Options?.GetValueByName(Common.Settings.Themes.Options.TextHeaderColor);
-            string textLinksColor = theme.Options?.GetValueByName(Common.Settings.Themes.Options.TextLinksColor);
-            string textLinksHoverColor = theme.Options?.GetValueByName(Common.Settings.Themes.Options.TextLinksHoverColor);
-            string navLinksColor = theme.Options?.GetValueByName(Common.Settings.Themes.Options.NavLinksColor);
-            string navLinksColorSelected = theme.Options?.GetValueByName(Common.Settings.Themes.Options.NavLinksColorSelected);
-            string navLinksColorHover = theme.Options?.GetValueByName(Common.Settings.Themes.Options.NavLinksColorHover);
-            string buttonDefaultColor = theme.Options?.GetValueByName(Common.Settings.Themes.Options.ButtonDefaultColor);
-            string buttonPrimaryColor = theme.Options?.GetValueByName(Common.Settings.Themes.Options.ButtonPrimaryColor);
-            string buttonDangerColor = theme.Options?.GetValueByName(Common.Settings.Themes.Options.ButtonDangerColor);
-
-            // custom css
-            string customCss = theme.Options?.GetValueByName(Common.Settings.Themes.Options.CustomCss);
-
-            tempCss = $@"
-body{themeClass} {{
-    {buildCssAttribute("background-color", backgroundColor)}
-    {buildCssAttribute("color", textColor)}
-}}
-
-{themeClass} .sidebar {{
-    {buildCssAttribute("background-color", sidebarColor)}
-}}
-
-{themeClass} .sidebar .nav-link {{
-    {buildCssAttribute("color", navLinksColor)}
-}}
-
-{themeClass} .table {{
-    {buildCssAttribute("color", textColor)}
-}}
-
-{themeClass} .table-hover tbody tr:hover {{
-    {buildCssAttribute("color", textColor)}    
-}}
-
-{{customCss}}
-";
-
-            //background-color: rgba(0,0,0,.075);
-
-            css.AppendLine(tempCss);
-
-            return css.ToString();
-        }
-
-        public async Task<Theme> CreateTheme(Theme theme)
-        {
-            await this.Themes.AddAsync(theme);
-            await this.SaveChangesAsync();
-            return await this.GetTheme(theme.Id);
-        }
-
-        public async Task<Theme> EditTheme(Theme theme)
-        {
-            Theme matchingTheme = await this.GetTheme(theme.Id);
-            matchingTheme.Description = theme.Description;
-            matchingTheme.Name = theme.Name;
-            this.Themes.Update(matchingTheme);
-            await this.SaveChangesAsync();
-            return await this.GetTheme(theme.Id);
-        }
-
-        public async Task DeleteTheme(int id)
-        {
-            Theme theme = await this.GetTheme(id);
-            this.Themes.Remove(theme);
-            this.ThemeOptions.RemoveRange(this.ThemeOptions.Where(x => x.ThemeId == id));
-            await this.SaveChangesAsync();
-        } 
-
-        public async Task SaveThemeOptions(ThemeOptionsViewModel themeOptions)
-        {
-            Func<int, string, string, Task> update = async (int themeId, string name, string value) =>
-            {
-                ThemeOption option = await this.ThemeOptions.SingleOrDefaultAsync(t => t.ThemeId == themeId && t.Name == name);
-                if (option != null)
-                {
-                    // update
-                    option.Value = value;
-                } else
-                {
-                    // create 
-                    await this.ThemeOptions.AddAsync(new ThemeOption() { ThemeId = themeId, Name = name, Value = value });
-                }
-            };
-            await update(themeOptions.ThemeId, Common.Settings.Themes.Options.BackgroundColor, themeOptions.BackgroundColor);
-            await update(themeOptions.ThemeId, Common.Settings.Themes.Options.SidebarColor, themeOptions.SidebarColor);
-            await update(themeOptions.ThemeId, Common.Settings.Themes.Options.TextColor, themeOptions.TextColor);
-            await update(themeOptions.ThemeId, Common.Settings.Themes.Options.TextHeaderColor, themeOptions.TextHeaderColor);
-            await update(themeOptions.ThemeId, Common.Settings.Themes.Options.TextLinksColor, themeOptions.TextLinksColor);
-            await update(themeOptions.ThemeId, Common.Settings.Themes.Options.TextLinksHoverColor, themeOptions.TextLinksHoverColor);            
-            await update(themeOptions.ThemeId, Common.Settings.Themes.Options.NavLinksColor, themeOptions.NavLinksColor);
-            await update(themeOptions.ThemeId, Common.Settings.Themes.Options.NavLinksColorSelected, themeOptions.NavLinksColorSelected);
-            await update(themeOptions.ThemeId, Common.Settings.Themes.Options.NavLinksColorHover, themeOptions.NavLinksColorHover);
-            await update(themeOptions.ThemeId, Common.Settings.Themes.Options.CustomCss, themeOptions.CustomCss);
-            await this.SaveChangesAsync();
-        }
-        #endregion
-
         #region Listener Actions
         public async Task<IEnumerable<Listener>> GetListeners()
         {
@@ -4135,57 +3961,6 @@ body{themeClass} {{
             this.Launchers.Update(matchingLauncher);
             await this.SaveChangesAsync();
             return await this.GetWscriptLauncher();
-        }
-        #endregion
-
-        #region Setting Actions
-        public async Task<Setting> ChangeSettingValue(string key, string value)
-        {
-            Setting setting = await GetSetting(key);
-            if (setting == null)
-            {
-                setting = new Setting() { Key = key, Value = value };
-                this.Settings.Add(setting);
-            } else
-            {
-                setting.Value = value;
-                this.Update(setting);
-            }            
-            await this.SaveChangesAsync();
-            return await this.GetSetting(setting.Key);
-        }
-
-        public async Task<Setting> EditSetting(Setting setting)
-        {
-            Setting matchedSetting = await GetSetting(setting.Key);
-            matchedSetting.Value = setting.Value;
-            this.Update(setting);
-            await this.SaveChangesAsync();
-            return await this.GetSetting(setting.Key);
-        }
-
-        public async Task<IEnumerable<Setting>> EditSettings(List<Setting> settings)
-        {
-            foreach(var setting in settings)
-            {
-                await EditSetting(setting);
-            }
-            return await GetSettings(settings.Select(s => s.Key).ToList());
-        }
-
-        public async Task<Setting> GetSetting(string key)
-        {
-            return await this.Settings.SingleOrDefaultAsync<Setting>(s => s.Key == key);
-        }
-
-        public async Task<IEnumerable<Setting>> GetSettings()
-        {
-            return await this.Settings.OrderBy(s => s.Title).ToListAsync();
-        }
-
-        public async Task<IEnumerable<Setting>> GetSettings(List<string> keys)
-        {
-            return await this.Settings.Where(s => keys.Contains(s.Key)).OrderBy(s => s.Title).ToListAsync();
         }
         #endregion
     }
