@@ -11,9 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Improved ComputerName parsing and output for Domain tasks
+- Made changes necessary for C3 integration, allowing outbound SMB grunts
 
 ### Fixed
 - Fixed missing http profiles on Ubuntu w/ workaround due to corefx issue
+- Fix GET /api/gruntcommand/{id} endpoint missing output
+- Fix [#122][issue-122] multiple connection addresses issue
 
 ## [v0.4] - 2019-10-30
 ### Added
@@ -184,3 +187,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.3.1]: https://github.com/cobbr/Covenant/compare/v0.3...v0.3.1
 [v0.3.2]: https://github.com/cobbr/Covenant/compare/v0.3.1...v0.3.2
 [v0.4]: https://github.com/cobbr/Covenant/compare/v0.3.2...v0.4
+
+[issue-122]: https://github.com/cobbr/Covenant/issues/122
